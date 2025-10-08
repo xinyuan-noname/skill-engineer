@@ -8,8 +8,8 @@
     "build": "deno run -A dev.ts build",
     "preview": "deno run -A main.ts",
     "update": "deno run -A -r https://fresh.deno.dev/update .",
-    "gendata":"deno run -A skill/transfer.ts",
-    "gentp":"deno run -A skill/templatize.ts"
+    "gendata": "deno run -A skill/transfer.ts",
+    "gentp": "deno run -A skill/templatize.ts"
   },
   "lint": {
     "rules": {
@@ -36,5 +36,13 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "jsxImportSource": "preact"
+  },
+  "deploy": {
+    "project": "a173c5fb-a92c-4c6e-80ea-f85664e458df",
+    "exclude": [
+      "**/node_modules"
+    ],
+    "include": [],
+    "entrypoint": "main.ts"
   }
 }
