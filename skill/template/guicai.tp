@@ -1,0 +1,62 @@
+trigger: { global: "judge" },
+preHidden: true,
+{{#filter}}
+	return player.countCards(get.mode() == "guozhan" ? "hes" : "hs") > 0;
+{{/filter}}
+{{#cost}}
+	const {
+		result: { bool, cards },
+	} = await player
+		.chooseCard(get.translation(trigger.player) + "的" + (trigger.judgestr || "") + "判定为" + get.translation(trigger.player.judging[0]) + "，" + get.prompt("guicai"), get.mode() == "guozhan" ? "hes" : "hs", card => {
+			const player = _status.event.player;
+			const mod2 = game.checkMod(card, player, "unchanged", "cardEnabled2", player);
+			if (mod2 != "unchanged") return mod2;
+			const mod = game.checkMod(card, player, "unchanged", "cardRespondable", player);
+			if (mod != "unchanged") return mod;
+			return true;
+		})
+		.set("ai", card => {
+			const trigger = _status.event.getTrigger();
+			const player = _status.event.player;
+			const judging = _status.event.judging;
+			const result = trigger.judge(card) - trigger.judge(judging);
+			const attitude = get.attitude(player, trigger.player);
+			let val = get.value(card);
+			if (get.subtype(card) == "equip2") val /= 2;
+			else val /= 4;
+			if (attitude == 0 || result == 0) return 0;
+			if (attitude > 0) {
+				return result - val;
+			}
+			return -result - val;
+		})
+		.set("judging", trigger.player.judging[0])
+		.setHiddenSkill("guicai");
+	if (bool) event.result = { bool, cost_data: { cards } };
+{{/cost}}
+popup: false,
+{{#content async=true}}
+	const chooseCardResultCards = event.cost_data.cards;
+	await player.respond(chooseCardResultCards, "guicai", "highlight", "noOrdering");
+	if (trigger.player.judging[0].clone) {
+		trigger.player.judging[0].clone.classList.remove("thrownhighlight");
+		game.broadcast(function (card) {
+			if (card.clone) {
+				card.clone.classList.remove("thrownhighlight");
+			}
+		}, trigger.player.judging[0]);
+		game.addVideo("deletenode", player, get.cardsInfo([trigger.player.judging[0].clone]));
+	}
+	game.cardsDiscard(trigger.player.judging[0]);
+	trigger.player.judging[0] = chooseCardResultCards[0];
+	trigger.orderingCards.addArray(chooseCardResultCards);
+	game.log(trigger.player, "的判定牌改为", chooseCardResultCards[0]);
+	await game.delay(2);
+	{{#a "e" "insert" players="player"}}{{/a}}
+{{/content}}
+ai: {
+	rejudge: true,
+	tag: {
+		rejudge: 1,
+	},
+},

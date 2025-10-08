@@ -1,0 +1,14 @@
+trigger: { player: "judgeEnd" },
+preHidden: true,
+frequent(event) {
+	return event.result.card.name !== "du";
+},
+check(event) {
+	return event.result.card.name !== "du";
+},
+{{#filter}}
+	return get.position(event.result.card, true) == "o";
+{{/filter}}
+{{#content async=true}}
+	player.gain(trigger.result.card, "gain2");
+{{/content}}

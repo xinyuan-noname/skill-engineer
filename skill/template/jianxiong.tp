@@ -1,0 +1,13 @@
+preHidden:true,
+trigger:{
+    player:"damageEnd"
+},
+{{#a "getIndex" "getIndex:num"}}
+{{/a}}
+{{#filter}}
+    return get.itemtype(event.cards) == "cards" && get.position(event.cards[0], true) == "o";
+{{/filter}}
+{{#content async=true}}
+    {{#a "e" "await"}}{{/a}}player.gain(trigger.cards, "gain2");
+    {{#a "e" "insert" players="player"}}{{/a}}
+{{/content}}
